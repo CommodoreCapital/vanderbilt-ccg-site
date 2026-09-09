@@ -14,9 +14,13 @@
 /* ==========================================================================
    CCG analytics dashboard.
    Chart colours follow the entity, not the rank:
-     gold  #c98500  = apply clicks      blue #3987e5 = visitors / traffic
-     aqua  #199e70  = report opens
-   Validated all-pairs on this dark surface (CVD dE 8.4, normal dE 19.8, all >= 3:1).
+     blue   #3987e5 = apply clicks     aqua #199e70 = visitors / traffic
+     orange #d95926 = report opens
+   Three hues are the minimum for three distinguishable series. Validated
+   all-pairs on this dark surface: worst CVD dE 9.4, normal dE 20.9, all >= 4.7:1.
+   Blue sits on the metric that matters most; the warm hue is on the least
+   prominent one. Do not swap orange for a second blue or violet — those fail
+   colourblind separation (dE 1.9) even though they look distinct to some eyes.
    ========================================================================== */
 :root{
   --surface-0:#0B0B0C;
@@ -26,11 +30,11 @@
   --text-primary:#F5F3EF;
   --text-secondary:#A9A7A2;
   --text-muted:#75747A;
-  --brand:#7FB2F0;       /* accent — chrome only, never a data mark */
+  --brand:#91B6DB;       /* accent — chrome only, never a data mark */
 
-  --apply:#c98500;
-  --visitors:#3987e5;
-  --reports:#199e70;
+  --apply:#3987e5;
+  --visitors:#199e70;
+  --reports:#d95926;
 
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   --radius:8px;
@@ -293,7 +297,7 @@ table{border-collapse:collapse;width:100%}
 (function(){
 'use strict';
 
-var C = { apply:'#c98500', visitors:'#3987e5', reports:'#199e70' };
+var C = { apply:'#3987e5', visitors:'#199e70', reports:'#d95926' };
 var SURFACE = '#141416', GRID = '#26262B', MUTED = '#75747A';
 
 var gate=document.getElementById('gate'), app=document.getElementById('app'),
