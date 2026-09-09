@@ -204,11 +204,11 @@
 
   R.reports = function (el, d) {
     var dir = (base ? base.replace(/\/$/, '') + '/' : '') + 'reports/';
-    var list = d.dealReports.slice().sort(function (a, b) {
-      return String(b.sortDate).localeCompare(String(a.sortDate));
-    });
+    // Order on the page is the order in the list, which is what the dashboard
+    // editor shows and reorders. No hidden sort key to keep in sync.
+    var list = d.dealReports.slice();
     el.innerHTML = list.map(function (r, i) {
-      return '<a class="report reveal" href="' + dir + esc(r.file) + '" target="_blank" rel="noopener"' +
+      return '<a class="report reveal" href="' + esc(img(dir, r.file)) + '" target="_blank" rel="noopener"' +
         ' data-track="report" data-track-label="' + esc(r.file) + '" data-type="' + esc(r.type) + '">' +
         '<span class="report__idx">' + String(i + 1).padStart(2, '0') + '</span>' +
         '<span class="report__title">' + esc(r.title) + '</span>' +

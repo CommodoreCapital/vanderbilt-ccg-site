@@ -95,18 +95,21 @@ function upload(file, onDone, onErr) {
     .catch(function () { onErr('Could not reach the server.'); });
 }
 
-function pickImage(onDone) {
+function pickFile(onDone, accept) {
   var input = document.createElement('input');
   input.type = 'file';
-  input.accept = 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml';
+  input.accept = accept || 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml';
   input.addEventListener('change', function () {
     var f = input.files && input.files[0];
     if (!f) return;
     onDone.busy && onDone.busy();
-    upload(f, onDone, function (m) { alert(m); onDone.fail && onDone.fail(); });
+    upload(f, function (ref) { onDone(ref, f.name); },
+              function (m) { alert(m); onDone.fail && onDone.fail(); });
   });
   input.click();
 }
+function pickImage(onDone) { pickFile(onDone); }
+function pickPdf(onDone)   { pickFile(onDone, 'application/pdf'); }
 
 /* ---------------- render ---------------- */
 function render() {
@@ -115,6 +118,7 @@ function render() {
       '<button class="ed-tab is-on" data-sec="apply">Apply link</button>' +
       '<button class="ed-tab" data-sec="exec">Exec team</button>' +
       '<button class="ed-tab" data-sec="classes">Analyst classes</button>' +
+      '<button class="ed-tab" data-sec="reports">Deal reports</button>' +
       '<button class="ed-tab" data-sec="slider">Logo slider</button>' +
     '</div>' +
     '<div id="edBody"></div>' +
@@ -144,6 +148,7 @@ function section(name) {
   if (name === 'apply')   return secApply(b);
   if (name === 'exec')    return secExec(b);
   if (name === 'classes') return secClasses(b);
+  if (name === 'reports') return secReports(b);
   if (name === 'slider')  return secSlider(b);
 }
 
@@ -322,6 +327,87 @@ function secClasses(b) {
     row.querySelector('[data-del]').addEventListener('click', function () {
       if (!confirm('Delete the "' + (data.analystClasses[i].term || 'untitled') + '" class?')) return;
       data.analystClasses.splice(i, 1); markDirty(); secClasses($('#edBody'));
+    });
+  });
+}
+
+/* ---- Deal reports ---- */
+function reportHref(file) {
+  file = String(file || '');
+  return file.indexOf('asset:') === 0
+    ? '/api/asset/' + file.slice(6).replace(/[^a-zA-Z0-9]/g, '')
+    : 'reports/' + file;
+}
+
+function secReports(b) {
+  var list = data.dealReports || (data.dealReports = []);
+  b.innerHTML =
+    '<div class="card">' +
+      '<div class="card__head"><div><h3 class="card__title">Deal reports</h3>' +
+      '<div class="card__note">The order here is the order on the Deal Reports page. ' +
+        'Newest at the top. PDFs up to 8MB.</div></div>' +
+      '<button class="toggle" id="addReport">+ Upload a report</button></div>' +
+      (list.length ? '<div class="reps">' + list.map(function (r, i) {
+        return '<div class="rep" data-i="' + i + '">' +
+          '<div class="rep__fields">' +
+            '<input class="fld__i" data-k="title" value="' + esc(r.title || '') + '" placeholder="Deal title, e.g. PepsiCo Acquires Poppi">' +
+            '<div class="rep__row">' +
+              '<input class="fld__i" data-k="date" value="' + esc(r.date || '') + '" placeholder="March 2026">' +
+              '<input class="fld__i" data-k="type" value="' + esc(r.type || '') + '" placeholder="M&A">' +
+            '</div>' +
+            '<a class="rep__file" href="' + esc(reportHref(r.file)) + '" target="_blank" rel="noopener">' +
+              (String(r.file || '').indexOf('asset:') === 0 ? 'Uploaded PDF — open' : esc(r.file || 'no file')) +
+            '</a>' +
+          '</div>' +
+          '<div class="rep__ops">' +
+            '<button class="toggle" data-replace="1">Replace PDF</button>' +
+            '<button class="iconbtn" data-mv="-1" ' + (i === 0 ? 'disabled' : '') + '>&uarr;</button>' +
+            '<button class="iconbtn" data-mv="1" ' + (i === list.length - 1 ? 'disabled' : '') + '>&darr;</button>' +
+            '<button class="iconbtn iconbtn--del" data-del="1">&#10005;</button>' +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>'
+      : '<div class="empty">No reports yet. Upload the first one.</div>') +
+    '</div>';
+
+  $('#addReport').addEventListener('click', function () {
+    var btn = this, old = btn.textContent;
+    var cb = function (ref, name) {
+      var title = String(name || '').replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
+      list.unshift({ title: title || 'New deal report', date: '', type: 'M&A', file: ref });
+      markDirty(); secReports($('#edBody'));
+    };
+    cb.busy = function () { btn.textContent = 'Uploading…'; btn.disabled = true; };
+    cb.fail = function () { btn.textContent = old; btn.disabled = false; };
+    pickPdf(cb);
+  });
+
+  $$('.rep', b).forEach(function (row) {
+    var i = +row.getAttribute('data-i');
+    $$('[data-k]', row).forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        list[i][inp.getAttribute('data-k')] = inp.value;
+        markDirty();
+      });
+    });
+    row.querySelector('[data-replace]').addEventListener('click', function () {
+      var btn = this, old = btn.textContent;
+      var cb = function (ref) { list[i].file = ref; markDirty(); secReports($('#edBody')); };
+      cb.busy = function () { btn.textContent = 'Uploading…'; btn.disabled = true; };
+      cb.fail = function () { btn.textContent = old; btn.disabled = false; };
+      pickPdf(cb);
+    });
+    $$('[data-mv]', row).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var j = i + (+btn.getAttribute('data-mv'));
+        if (j < 0 || j >= list.length) return;
+        var t = list[i]; list[i] = list[j]; list[j] = t;
+        markDirty(); secReports($('#edBody'));
+      });
+    });
+    row.querySelector('[data-del]').addEventListener('click', function () {
+      if (!confirm('Remove "' + (list[i].title || 'this report') + '" from the site?')) return;
+      list.splice(i, 1); markDirty(); secReports($('#edBody'));
     });
   });
 }
