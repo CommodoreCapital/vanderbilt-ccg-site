@@ -1,0 +1,212 @@
+{
+  "_README": "This is the ONLY file most people need to edit. Change text here and the website updates. Keep the commas and quotes exactly as they are — if the site goes blank, you probably deleted a comma. Paste the file into jsonlint.com to check it.",
+
+  "org": {
+    "name": "Commodore Capital Group",
+    "shortName": "CCG",
+    "university": "Vanderbilt University",
+    "tagline": "Where Vanderbilt University meets private financial markets",
+    "description": "Vanderbilt's first student organization dedicated to the private markets — private equity, venture capital, and alternative asset classes.",
+    "address": ["2301 Vanderbilt Place", "Nashville, TN 37235"],
+    "linkedin": "https://www.linkedin.com/company/commodore-capital-group/mycompany/",
+    "instagram": "https://www.instagram.com/vanderbilt_ccg/",
+    "foundedYear": 2022
+  },
+
+  "apply": {
+    "isOpen": true,
+    "headline": "Fall 2026 Applications Open Now",
+    "subhead": "We recruit freshmen and sophomores across every major. No prior finance experience required.",
+    "url": "https://forms.gle/4GtCevwqpGQLAhht5",
+    "buttonLabel": "Apply Here",
+    "deadline": "",
+    "closedMessage": "Applications are currently closed. Follow us on Instagram to hear when they reopen."
+  },
+
+  "stats": [
+    { "value": "18",   "label": "Firms placed" },
+    { "value": "135+", "label": "Analysts trained" },
+    { "value": "10",   "label": "Deal reports published" },
+    { "value": "2022", "label": "Founded" }
+  ],
+
+  "pillars": [
+    {
+      "name": "Education",
+      "body": "Each semester, our new class of analysts participates in a rigorous curriculum that encompasses an overview of private financial markets, the capital deployment process, and technical skill development."
+    },
+    {
+      "name": "Immersion",
+      "body": "CCG members participate in a case study of the private market investment process within a sector that interests them. Members develop a comprehensive deal report which is presented to the group at the end of the semester. Teams source potential investments, perform due diligence, and deliver a final presentation with their investment recommendation."
+    },
+    {
+      "name": "Network",
+      "body": "By cultivating a network of diverse, business-focused individuals interested in the private financial markets, we are the primary contact point for PE/VC recruiting at Vanderbilt. Our speaker series of industry leaders gives members the opportunity to expand their network and learn more about the industry."
+    }
+  ],
+
+  "placements": [
+    { "name": "Goldman Sachs",          "logo": "goldman-sachs.png" },
+    { "name": "Morgan Stanley",         "logo": "morgan-stanley.png" },
+    { "name": "J.P. Morgan",            "logo": "jpmorgan.png" },
+    { "name": "Bank of America",        "logo": "bank-of-america.png" },
+    { "name": "Barclays",               "logo": "barclays.png" },
+    { "name": "Jefferies",              "logo": "jefferies.png" },
+    { "name": "Evercore",               "logo": "evercore.png" },
+    { "name": "Centerview Partners",    "logo": "centerview.png" },
+    { "name": "PJT Partners",           "logo": "pjt-partners.png" },
+    { "name": "Perella Weinberg",       "logo": "perella-weinberg.png" },
+    { "name": "Rothschild & Co",        "logo": "rothschild.png" },
+    { "name": "The Raine Group",        "logo": "raine-group.png" },
+    { "name": "Blackstone",             "logo": "blackstone.png" },
+    { "name": "KKR",                    "logo": "kkr.png" },
+    { "name": "Vista Equity Partners",  "logo": "vista.png" },
+    { "name": "Roark Capital",          "logo": "roark.png" },
+    { "name": "Audax Group",            "logo": "audax.png" },
+    { "name": "Bridgewater Associates", "logo": "bridgewater.png" }
+  ],
+
+  "executiveBoard": {
+    "heading": "Executive Board 2026",
+    "members": [
+      {
+        "name": "Tyler Hwang",
+        "role": "President",
+        "email": "tyler.s.hwang@vanderbilt.edu",
+        "linkedin": "https://www.linkedin.com/in/hwangtyler",
+        "photo": "tyler-hwang.png",
+        "bio": "Tyler is a junior at Vanderbilt University majoring in Chemical Engineering and Economics with a minor in Chemistry. He worked with Blue Owl's GP Strategic Capital group this past summer, and will be joining Morgan Stanley in the Investment Banking Division for the summer of 2027."
+      },
+      {
+        "name": "Brooke Hudacek",
+        "role": "Vice President",
+        "email": "brooke.g.hudacek@vanderbilt.edu",
+        "linkedin": "https://www.linkedin.com/in/brooke-hudacek2028/",
+        "photo": "brooke-hudacek.png",
+        "bio": "Brooke is a junior at Vanderbilt University majoring in Math with minors in Business and Data Science. This past summer, she worked with the Consumer Investment Team at Bertram Capital. Brooke will be joining Morgan Stanley in the Investment Banking Division for the summer of 2027."
+      },
+      {
+        "name": "Grace Allen",
+        "role": "Head of Professional Opportunities",
+        "email": "",
+        "linkedin": "https://www.linkedin.com/in/graceceallen/",
+        "photo": "grace-allen.png",
+        "bio": "Grace is a junior at Vanderbilt University majoring in Economics and Medicine, Health, and Society, with a minor in Business. This past summer she interned as a Summer Analyst at D1 Capital and will join Goldman Sachs as an Investment Banking Summer Analyst in summer 2027."
+      },
+      {
+        "name": "Ben Ruppert",
+        "role": "Head of Recruitment",
+        "email": "",
+        "linkedin": "https://www.linkedin.com/in/ben-ruppert/",
+        "photo": "ben-ruppert.jpg",
+        "bio": "Ben is a junior at Vanderbilt University majoring in Economics and History with a minor in Business. This past summer, Ben worked at Liberty Mutual Investments as an intern in their GAM Division on the Private Equity team. Ben will join Jefferies in the Investment Banking Division for summer 2027."
+      },
+      {
+        "name": "Samar Munagala",
+        "role": "Head of Research",
+        "email": "",
+        "linkedin": "https://www.linkedin.com/in/samarmunagala/",
+        "photo": "samar-munagala.png",
+        "bio": "Samar is a junior at Vanderbilt University majoring in Economics with minors in Data Science and Music. He will join PJT Partners as a 2027 Investment Banking Summer Analyst in the Park Hill Private Capital Solutions group, focusing on secondary market transactions."
+      }
+    ]
+  },
+
+  "managingDirectors": {
+    "heading": "Managing Directors",
+    "members": [
+      { "name": "Caroline Caggiano", "role": "Managing Director", "linkedin": "https://www.linkedin.com/in/caroline-caggiano-b03883293/", "photo": "caroline-caggiano.jpg", "bio": "" },
+      { "name": "Gus Collins",       "role": "Managing Director", "linkedin": "https://www.linkedin.com/in/gus-collins-31abb928b/",       "photo": "gus-collins.jpg",       "bio": "" },
+      { "name": "Sasha Rafiy",       "role": "Managing Director", "linkedin": "https://www.linkedin.com/in/sasha-rafiy/",                "photo": "sasha-rafiy.jpg",       "bio": "" }
+    ]
+  },
+
+  "analystClasses": [
+    {
+      "term": "Spring 2026",
+      "members": [
+        "Aaron Ferber", "Adam Shamloul", "Ashley Zhang", "Ayan Pai", "Charles Hoine", "Chase Elsas",
+        "Cobin Citron", "Colin Lauri", "Devraj Dhupar", "Jacob Klein", "Jake Dorfman", "Jim Knop",
+        "Jonah Schweitzer", "Jordan Hochberg", "Joshua Song", "Kashish Arora", "Lila Peck", "Luca Ladner",
+        "Nathan Alexander", "Philip Dee Block V", "Reese Glasser", "Sofia Picciola", "Sophie Ghobriel",
+        "Yurim Chang", "Zachary Gross", "Zoe Turteltaub"
+      ]
+    },
+    {
+      "term": "Fall 2025",
+      "members": [
+        "Sofia Alvarez-Gonzalez", "Grace Allen", "Eitan Hahn", "Anishsai Gudipaati", "Vivan Kotak",
+        "Tyler Hwang", "Molly Dinerstein", "Hayden Lewitton", "Hunter Lane", "Harrison Lane",
+        "Jackson Tracey", "Channing Pauley", "Dhruvil Pujara", "Michael Varnava", "Naomi Vinokour",
+        "Guo Xiaojin", "James Morgan", "Katelyn Teaford", "Tejasvi Rawat", "Harry Zhu"
+      ]
+    },
+    {
+      "term": "Spring 2025",
+      "members": [
+        "Abass Garba", "Hailey Gao", "Vardaan Ghai", "Neil Dewan", "Emma Goldstone", "Brady Galperson",
+        "Brooke Hudacek", "Cole Liffman", "JD Maske", "Retta Nash", "Juliana Orman", "Drew Navarro",
+        "Milo Nitze", "Samarsimha Munagala", "Anshuman Parulekar", "Avyay Parmeswaran", "Zach Pero",
+        "Ben Ruppert", "Taylor Schorr", "Josh Sweetland", "Thomas Toole", "Joe Vargehese",
+        "Alexander Wiseman", "Mason Wehmeyer"
+      ]
+    },
+    {
+      "term": "Fall 2024",
+      "members": [
+        "Jack Bijur", "Fiona Cho", "Marianna Gu", "Ava Hatfield", "Harrison Huai", "Trent Bednar",
+        "Jake Agranovich", "Rahul Menon", "Isabella Pham", "Rishabh Mantha", "Ayush Mudgal", "Maya Goel",
+        "Sean Thomas Young", "Nick Roddy", "Hunter Schneck", "Katie Sasamoto-Kurisu", "Lilly Fergang",
+        "Shlok Parab", "Renato Zamboni de Albuquerque", "Patrick Schwartz", "Jack Sturman", "Gavin Picklin",
+        "Maria Buligoanea", "Hannah Mitchell", "AJ Dale"
+      ]
+    },
+    {
+      "term": "Spring 2024",
+      "members": [
+        "Carolina Addison", "Francesca Arias", "Jenny Chu", "Gus Collins", "Caden Cyr", "Caroline Caggiano",
+        "Jackson Heis", "Alex Homem", "Harris Lee", "Addison Klebanov", "Ellie Parkhill", "Sasha Rafiy",
+        "Noah Roslin", "Preston Rutledge", "George Seybold", "Ben Shelton", "Jordan Tobias"
+      ]
+    },
+    {
+      "term": "Fall 2023",
+      "members": [
+        "Mohak Agarwalla", "Magda Badogiannaki", "Ignacio (Andy) Bru", "Teagan Cavaliere",
+        "Leonardo De Paoli", "Zachary Gaoiran", "Holiday Host", "Geetika Komati", "Jack Levy",
+        "Paulo Nicoli", "Samantha Medvinsky", "Jessica Peck", "Kathleen Praino", "Kevin Phan",
+        "Adam Roseman", "Ben Schiff", "Jeremy Suzman", "Christina Turner", "Ansley Walker"
+      ]
+    },
+    {
+      "term": "Other Former Analysts",
+      "members": [
+        "Alex Filipova", "Ben Ferraro", "Brooke Garmisa", "Eloise Benissan", "Leon Mhingiro",
+        "Nick Vitebsky", "Sofia Serdar"
+      ]
+    }
+  ],
+  "dealReports": [
+    { "title": "WK Kellogg Co Acquired",                 "date": "September 2025", "sortDate": "2025-09-01", "type": "M&A",         "file": "wk-kellogg-acquired.pdf" },
+    { "title": "RXR Buys Former IBM Building",           "date": "August 2025",    "sortDate": "2025-08-01", "type": "Real Estate", "file": "rxr-ibm-building.pdf" },
+    { "title": "Union Pacific / Norfolk Southern Merger","date": "July 2025",      "sortDate": "2025-07-01", "type": "M&A",         "file": "union-pacific-norfolk-southern.pdf" },
+    { "title": "PepsiCo Acquires Poppi",                 "date": "May 2025",       "sortDate": "2025-05-01", "type": "M&A",         "file": "pepsico-poppi.pdf" },
+    { "title": "AMD Acquires ZT Systems",                "date": "March 2025",     "sortDate": "2025-03-01", "type": "M&A",         "file": "amd-zt-systems.pdf" },
+    { "title": "Smartsheet Take-Private",                "date": "September 2024", "sortDate": "2024-09-01", "type": "Take-Private","file": "smartsheet-take-private.pdf" },
+    { "title": "Blackstone Acquires Rover",              "date": "February 2024",  "sortDate": "2024-02-01", "type": "Take-Private","file": "blackstone-rover.pdf" },
+    { "title": "Kore.ai Series D Funding",               "date": "February 2024",  "sortDate": "2024-02-02", "type": "Venture",     "file": "koreai-series-d.pdf" },
+    { "title": "Instem Take-Private",                    "date": "December 2023",  "sortDate": "2023-12-01", "type": "Take-Private","file": "instem-take-private.pdf" },
+    { "title": "Urbanic Series C Funding",               "date": "December 2023",  "sortDate": "2023-12-02", "type": "Venture",     "file": "urbanic-series-c.pdf" }
+  ],
+
+  "faqs": [
+    { "q": "What is Commodore Capital Group?", "a": "Commodore Capital Group is Vanderbilt's first student organization dedicated to the private markets. In CCG, we explore private equity, venture capital, and other alternative asset classes through an immersive curriculum, hands-on projects, and leading guest speakers." },
+    { "q": "What do we look for in an applicant?", "a": "When reviewing resumes and applications, we look for demonstrated passion and interest in furthering your knowledge of financial topics. We are looking primarily for freshmen and sophomores looking to go into high finance roles within PE, IB, hedge funds, private credit, etc. While prior internship or work experience within these fields is definitely a plus, we do not in the slightest mandate that applicants must have prior experience to be admitted. We particularly look for demonstrated personal, academic, and professional excellence throughout the various aspects of your career at Vanderbilt." },
+    { "q": "Is there a specific resume format that CCG looks for?", "a": "While we do not have a specific resume format that we look for, we encourage applicants to consult the Vanderbilt AKPsi website for guidance with your resume; they have a professional resume template that many of our successful applicants have used." },
+    { "q": "Are there any specific procedures to follow in the application process?", "a": "Because we review applications anonymously, please remove your name, hometown, Greek affiliations, and any other information that could be used to personally identify you from your resume. Additionally, please do not include your first or last name in the title of your PDF document." },
+    { "q": "What does the application consist of?", "a": "The first round application consists of a few brief introductory questions and a resume drop. The second round will require you to submit a video answering a few short questions. The final round will be an interview with our team that will contain a behavioral portion and basic technical questions." },
+    { "q": "What is CCG's time commitment?", "a": "You should expect to dedicate between 1–3 hours per week to CCG, which includes both our general meeting time as well as any additional work that may be completed on your own time." },
+    { "q": "When does CCG meet?", "a": "CCG meets once a week, at a time set by the availability of the newest analyst class." },
+    { "q": "Whom can I contact if I have additional questions?", "a": "Feel free to contact the executive board — their emails and LinkedIn profiles are on the Our Team page." }
+  ]
+}

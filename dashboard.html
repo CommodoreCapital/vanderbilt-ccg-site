@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Analytics | Commodore Capital Group</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B0B0C">
+<link rel="icon" href="assets/img/brand/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   CCG analytics dashboard.
+   Chart colours follow the entity, not the rank:
+     gold  #c98500  = apply clicks      blue #3987e5 = visitors / traffic
+     aqua  #199e70  = report opens
+   Validated all-pairs on this dark surface (CVD dE 8.4, normal dE 19.8, all >= 3:1).
+   ========================================================================== */
+:root{
+  --surface-0:#0B0B0C;
+  --surface-1:#141416;   /* chart surface */
+  --surface-2:#1B1B1F;
+  --line:#26262B;        /* hairline, one step off surface */
+  --text-primary:#F5F3EF;
+  --text-secondary:#A9A7A2;
+  --text-muted:#75747A;
+  --brand:#C9A96A;       /* brand accent — chrome only, never a data mark */
+
+  --apply:#c98500;
+  --visitors:#3987e5;
+  --reports:#199e70;
+
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box}
+/* An author `display` rule beats the UA stylesheet's [hidden]{display:none},
+   so .gate{display:grid} would keep the sign-in screen on top of the
+   dashboard once Access hands us a session. Make [hidden] win. */
+[hidden]{display:none!important}
+body{
+  margin:0;background:var(--surface-0);color:var(--text-secondary);
+  font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;color:var(--text-primary);font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+table{border-collapse:collapse;width:100%}
+.wrap{max-width:1240px;margin-inline:auto;padding-inline:clamp(16px,3vw,32px)}
+
+/* ---------- gate ---------- */
+.gate{min-height:100svh;display:grid;place-items:center;padding:24px}
+.gate__card{width:100%;max-width:380px;text-align:center}
+.gate__logo{height:56px;width:auto;margin:0 auto 28px;display:block}
+.gate h1{font-size:1.25rem;margin-bottom:.4rem}
+.gate p{font-size:.88rem;color:var(--text-muted);margin-bottom:1.8rem}
+.btn{
+  background:var(--brand);color:#0B0B0C;border-radius:6px;padding:.75rem 1.15rem;
+  font-weight:600;font-size:.82rem;letter-spacing:.02em;transition:opacity .2s;white-space:nowrap;
+}
+.btn:hover{opacity:.88}
+.btn--quiet{background:var(--surface-1);color:var(--text-secondary);border:1px solid var(--line)}
+.btn--quiet:hover{color:var(--text-primary);opacity:1}
+.err{margin-top:1rem;font-size:.84rem;color:#e66767;min-height:1.2em}
+
+
+/* ---------- main tabs + identity ---------- */
+.maintabs{display:flex;gap:4px;background:var(--surface-1);border:1px solid var(--line);
+  border-radius:7px;padding:3px}
+.maintab{padding:.42rem .95rem;border-radius:5px;font-size:.82rem;color:var(--text-secondary);transition:.18s}
+.maintab:hover{color:var(--text-primary)}
+.maintab.is-on{background:var(--surface-2);color:var(--text-primary);box-shadow:inset 0 0 0 1px var(--line)}
+.whoami{font-size:.76rem;color:var(--text-muted);max-width:24ch;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:760px){
+  .topbar__in{height:auto;padding-block:10px;flex-wrap:wrap}
+  .whoami{order:3;width:100%}
+}
+
+/* ---------- editor ---------- */
+.ed-tabs{display:flex;flex-wrap:wrap;gap:4px;padding-block:22px 14px}
+.ed-tab{padding:.45rem .9rem;border-radius:100px;font-size:.8rem;color:var(--text-muted);
+  border:1px solid var(--line);transition:.18s}
+.ed-tab:hover{color:var(--text-primary);border-color:var(--text-muted)}
+.ed-tab.is-on{background:var(--text-primary);color:var(--surface-0);border-color:var(--text-primary)}
+
+.fld{display:block;margin-bottom:16px}
+.fld__l{display:block;font-size:.78rem;color:var(--text-secondary);margin-bottom:6px}
+.fld__h{display:block;font-size:.74rem;color:var(--text-muted);margin-top:5px}
+.fld__i{
+  width:100%;background:var(--surface-0);border:1px solid var(--line);border-radius:6px;
+  padding:.6rem .75rem;color:var(--text-primary);font:inherit;font-size:.86rem;
+}
+.fld__i:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+.fld__t{resize:vertical;line-height:1.5}
+
+.seg{display:inline-flex;background:var(--surface-0);border:1px solid var(--line);border-radius:6px;padding:3px}
+.seg__b{padding:.4rem .9rem;border-radius:4px;font-size:.8rem;color:var(--text-secondary)}
+.seg__b.is-on{background:var(--brand);color:var(--surface-0);font-weight:600}
+
+.iconbtn{width:28px;height:28px;border:1px solid var(--line);border-radius:5px;color:var(--text-muted);
+  font-size:.8rem;line-height:1;transition:.18s;flex:0 0 auto}
+.iconbtn:hover:not(:disabled){color:var(--text-primary);border-color:var(--text-muted)}
+.iconbtn:disabled{opacity:.3;cursor:not-allowed}
+.iconbtn--del:hover{color:#e66767;border-color:#e66767}
+
+/* people */
+.people{display:flex;flex-direction:column;gap:14px}
+.person{display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:start;
+  padding:14px;background:var(--surface-0);border:1px solid var(--line);border-radius:var(--radius)}
+.person__pic{position:relative;aspect-ratio:4/5;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.person__pic img{width:100%;height:100%;object-fit:cover;display:block}
+.person__empty{position:absolute;inset:0;display:grid;place-items:center;font-size:.7rem;color:var(--text-muted)}
+.person__pick{position:absolute;left:0;right:0;bottom:0;background:rgba(11,11,12,.82);
+  font-size:.7rem;padding:.3rem;color:var(--text-primary)}
+.person__fields{display:flex;flex-direction:column;gap:8px;min-width:0}
+.person__ops{display:flex;flex-direction:column;gap:6px}
+@media(max-width:700px){
+  .person{grid-template-columns:76px 1fr}
+  .person__ops{grid-column:1/-1;flex-direction:row}
+}
+
+/* analyst classes */
+.klass{padding:14px;background:var(--surface-0);border:1px solid var(--line);
+  border-radius:var(--radius);margin-bottom:12px}
+.klass__head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.klass__term{flex:1;min-width:0}
+.klass__n{font-size:.74rem;color:var(--text-muted);white-space:nowrap}
+.klass__names{font-size:.84rem;line-height:1.6}
+
+/* logo slider */
+.logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.logo{padding:12px;background:var(--surface-0);border:1px solid var(--line);border-radius:var(--radius)}
+/* Most firm logos are dark artwork on transparency. The public marquee inverts
+   them to white; here we sit them on a light panel so you can see what you have. */
+.logo__img{height:64px;display:grid;place-items:center;background:#F1EFEA;
+  border-radius:5px;margin-bottom:10px;overflow:hidden;padding:8px}
+.logo__img img{max-height:44px;max-width:85%;object-fit:contain}
+.logo__ops{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+
+/* save bar */
+.savebar{position:sticky;bottom:0;margin-top:18px;padding:14px 18px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:var(--radius);display:flex;gap:14px;
+  align-items:center;justify-content:space-between;flex-wrap:wrap;
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s}
+.savebar.is-on{opacity:1;transform:none;pointer-events:auto}
+.savebar__actions{display:flex;gap:8px}
+.savemsg{font-size:.8rem;color:var(--text-secondary)}
+.savemsg.is-good{color:#0ca30c}
+.savemsg.is-bad{color:#e66767}
+
+/* ---------- app chrome ---------- */
+.topbar{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,11,12,.9);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:20}
+.topbar__in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:62px}
+.topbar__brand{display:flex;align-items:center;gap:12px}
+.topbar__brand img{height:26px;width:auto}
+.topbar__brand span{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+
+/* one filter row above everything it scopes */
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  padding-block:22px 4px}
+.ranges{display:inline-flex;background:var(--surface-1);border:1px solid var(--line);border-radius:7px;padding:3px}
+.range{padding:.42rem .85rem;border-radius:5px;font-size:.8rem;color:var(--text-secondary);transition:.18s}
+.range:hover{color:var(--text-primary)}
+.range.is-on{background:var(--surface-2);color:var(--text-primary);box-shadow:inset 0 0 0 1px var(--line)}
+.meta{font-size:.76rem;color:var(--text-muted)}
+
+/* ---------- stat tiles ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+@media(max-width:880px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--surface-1);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px}
+.tile__label{font-size:.76rem;color:var(--text-muted);display:flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.tile__value{
+  /* hero figures: same sans as everything else, proportional figures */
+  font-size:clamp(1.8rem,3.4vw,2.4rem);font-weight:600;color:var(--text-primary);
+  line-height:1.15;margin-top:8px;letter-spacing:-.02em;
+}
+.tile__sub{font-size:.76rem;color:var(--text-muted);margin-top:4px}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:12px;margin-top:12px}
+.grid--2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:880px){.grid--2{grid-template-columns:1fr}}
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;position:relative}
+.card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.card__title{font-size:.95rem;color:var(--text-primary);font-weight:600;display:flex;align-items:center;gap:8px}
+.card__note{font-size:.76rem;color:var(--text-muted);margin-top:2px}
+.toggle{font-size:.72rem;color:var(--text-muted);border:1px solid var(--line);border-radius:5px;
+  padding:.28rem .6rem;transition:.18s;white-space:nowrap}
+.toggle:hover{color:var(--text-primary);border-color:var(--text-muted)}
+.plot{position:relative}
+.plot svg{display:block;width:100%;height:auto;overflow:visible}
+
+/* ---------- horizontal bar rows ---------- */
+.hbars{display:flex;flex-direction:column;gap:2px}      /* 2px surface gap between bars */
+.hbar{display:grid;grid-template-columns:minmax(84px,29%) 1fr auto;align-items:center;gap:12px;
+  padding-block:5px;min-height:26px}
+.hbar__label{font-size:.82rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar__track{height:14px;position:relative}
+.hbar__fill{height:100%;border-radius:0 4px 4px 0;min-width:2px}  /* square at baseline, 4px data-end */
+.hbar__val{font-size:.8rem;color:var(--text-primary);font-variant-numeric:tabular-nums;min-width:3ch;text-align:right}
+
+/* ---------- table view ---------- */
+.tbl{font-size:.82rem}
+.tbl th{text-align:left;color:var(--text-muted);font-weight:500;font-size:.74rem;
+  padding:6px 10px 6px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface-1)}
+.tbl td{padding:6px 10px 6px 0;border-bottom:1px solid var(--line);color:var(--text-secondary);
+  font-variant-numeric:tabular-nums}
+.tbl td:first-child{color:var(--text-primary);font-variant-numeric:normal}
+.tbl-scroll{max-height:320px;overflow:auto}
+
+/* ---------- tooltip ---------- */
+.tip{position:absolute;pointer-events:none;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:6px;padding:8px 10px;font-size:.78rem;color:var(--text-primary);
+  box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;z-index:10;white-space:nowrap}
+.tip.is-on{opacity:1}
+.tip__k{color:var(--text-muted);font-size:.72rem;display:block;margin-bottom:2px}
+.tip__v{font-variant-numeric:tabular-nums}
+
+.empty{text-align:center;padding:34px 16px;color:var(--text-muted);font-size:.86rem}
+.setup{background:var(--surface-1);border:1px solid var(--line);border-left:3px solid var(--brand);
+  border-radius:var(--radius);padding:18px;margin-top:20px}
+.setup code{background:var(--surface-2);padding:.12em .4em;border-radius:3px;color:var(--brand);font-size:.86em}
+.foot{padding:28px 0 40px;font-size:.76rem;color:var(--text-muted);border-top:1px solid var(--line);margin-top:28px}
+.is-stale{opacity:.45;transition:opacity .2s}   /* hold previous render on refetch — no skeleton flash */
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:3px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ===================== signed-out / error state ===================== -->
+<div class="gate" id="gate" hidden>
+  <div class="gate__card">
+    <img class="gate__logo" src="assets/img/brand/ccg-logo-white.png" alt="Commodore Capital Group">
+    <h1 id="gateTitle">Signing you in…</h1>
+    <p id="gateMsg">Checking your Cloudflare Access session.</p>
+    <button class="btn" id="gateRetry" hidden>Reload</button>
+  </div>
+</div>
+
+<!-- ===================== app ===================== -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="wrap topbar__in">
+      <div class="topbar__brand">
+        <img src="assets/img/brand/ccg-logo-white.png" alt="">
+        <span>Dashboard</span>
+      </div>
+      <nav class="maintabs" role="tablist">
+        <button class="maintab is-on" data-view="analytics">Analytics</button>
+        <button class="maintab" data-view="edit">Edit site</button>
+      </nav>
+      <span class="whoami" id="whoami"></span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ---------- analytics ---------- -->
+    <section id="viewAnalytics">
+    <div class="filters">
+      <div class="ranges" role="group" aria-label="Date range">
+        <button class="range" data-days="7">7 days</button>
+        <button class="range is-on" data-days="30">30 days</button>
+        <button class="range" data-days="90">90 days</button>
+        <button class="range" data-days="365">1 year</button>
+      </div>
+      <span class="meta" id="meta"></span>
+    </div>
+
+    <div id="content"></div>
+
+    <div class="foot">
+      Counts people by browser session, not by device fingerprint. No cookies, no IP
+      addresses, no personal data — sessions reset when the tab closes. Days are
+      Nashville time.
+    </div>
+    </section>
+
+    <!-- ---------- site editor ---------- -->
+    <section id="viewEdit" hidden>
+      <div id="editorMount"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var C = { apply:'#c98500', visitors:'#3987e5', reports:'#199e70' };
+var SURFACE = '#141416', GRID = '#26262B', MUTED = '#75747A';
+
+var gate=document.getElementById('gate'), app=document.getElementById('app'),
+    content=document.getElementById('content'), meta=document.getElementById('meta');
+
+var state = { days:30, data:null, views:{}, titles:{} };
+
+/* Map deal-report filenames to their real titles so the dashboard shows
+   "PepsiCo Acquires Poppi" rather than "Pepsico Poppi". Best-effort:
+   if it fails we fall back to prettifying the filename. */
+function loadTitles(){
+  return fetch('/api/content')
+    .then(function(r){ return r.status===200 ? r.json() : fetch('data/site.json').then(function(x){return x.json();}); })
+    .catch(function(){ return fetch('data/site.json').then(function(x){return x.json();}); })
+    .then(function(d){
+      (d.dealReports||[]).forEach(function(r){ if (r.file) state.titles[r.file] = r.title; });
+    })
+    .catch(function(){ /* names just stay prettified */ });
+}
+
+/* ---------------- helpers ---------------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function compact(n){
+  n = Number(n)||0;
+  if (n < 1000) return String(n);
+  if (n < 1e6)  return (n/1e3).toFixed(n<1e4?1:0).replace(/\.0$/,'')+'K';
+  return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+}
+function pct(x){ return (x*100).toFixed(x>=0.1?0:1)+'%'; }
+function fmtDay(d){
+  var p=String(d).split('-');
+  return new Date(p[0],p[1]-1,p[2]).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function el(html){ var t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+
+/* ---------------- access ----------------
+   There is no password. Cloudflare Access authenticates the person before the
+   request reaches the server; every /api/admin/* call carries that session. */
+function fetchStats(days){
+  return fetch('/api/admin/stats?days='+days, { credentials:'same-origin' })
+    .then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        return { ok:r.ok, status:r.status, body:j };
+      });
+    });
+}
+
+function showGate(title, msg, retry){
+  gate.hidden=false; app.hidden=true;
+  document.getElementById('gateTitle').textContent = title;
+  document.getElementById('gateMsg').textContent = msg;
+  document.getElementById('gateRetry').hidden = !retry;
+}
+document.getElementById('gateRetry').addEventListener('click', function(){ location.reload(); });
+
+/* tabs */
+document.querySelectorAll('.maintab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.maintab').forEach(function(x){x.classList.remove('is-on');});
+    t.classList.add('is-on');
+    var v = t.getAttribute('data-view');
+    document.getElementById('viewAnalytics').hidden = (v!=='analytics');
+    document.getElementById('viewEdit').hidden      = (v!=='edit');
+    if (v==='edit' && !state.editorReady){
+      state.editorReady = true;
+      window.CCGAdmin.init({ mount: document.getElementById('editorMount') });
+    }
+    if (v==='analytics' && state.series) drawPlots(state.series);
+  });
+});
+
+document.querySelectorAll('.range').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.range').forEach(function(x){x.classList.remove('is-on');});
+    b.classList.add('is-on');
+    state.days = parseInt(b.getAttribute('data-days'),10);
+    content.classList.add('is-stale');           // hold previous render, no skeleton flash
+    fetchStats(state.days).then(handle);
+  });
+});
+
+/* boot */
+fetch('/api/admin/me', { credentials:'same-origin' })
+  .then(function(r){
+    if (r.status===401) { showGate('Not signed in',
+      'Open this page at vanderbiltccg.com/dashboard and sign in through Cloudflare Access.', true); return null; }
+    if (r.status===503) { return r.json().then(function(j){
+      showGate('Not set up yet', j.message || 'Admin access is not configured.', true); return null; }); }
+    return r.json();
+  })
+  .then(function(me){
+    if (!me) return null;
+    document.getElementById('whoami').textContent = me.email || '';
+    gate.hidden=true; app.hidden=false;
+    return loadTitles().then(function(){ return fetchStats(state.days); });
+  })
+  .catch(function(){
+    // Only reached if sign-in or the network failed — not a rendering problem.
+    showGate('Could not reach the server', 'Check your connection and try again.', true);
+    return null;
+  })
+  .then(function(res){
+    if (!res) return;
+    // Rendering runs outside the catch above so its errors surface honestly.
+    handle(res);
+  });
+
+function handle(res){
+  content.classList.remove('is-stale');
+  try { return handleInner(res); }
+  catch (err) {
+    console.error('dashboard render failed', err);
+    content.innerHTML = '<div class="setup"><strong>Something went wrong drawing the dashboard.</strong><br>' +
+      esc(String(err && err.message || err)) + '</div>';
+  }
+}
+
+function handleInner(res){
+  if (res.status===503 || (res.body && res.body.error==='setup')) return renderSetup(res.body);
+  if (!res.ok) { content.innerHTML='<div class="setup">Could not load stats. '+esc((res.body&&res.body.message)||'')+'</div>'; return; }
+  state.data = res.body;
+  render();
+}
+
+function renderSetup(b){
+  content.innerHTML =
+   '<div class="setup"><h2 style="font-size:1rem;margin-bottom:.6rem">Almost there</h2>'+
+   '<p style="margin-bottom:.8rem">'+esc(b&&b.message||'')+'</p>'+
+   '<p style="font-size:.84rem;color:var(--text-muted)">See <code>DEPLOY.md</code> — steps 4 and 5 — for exactly where these go in the Cloudflare dashboard.</p></div>';
+}
+
+/* ---------------- charts ---------------- */
+
+/* Vertical bars over time. One series; the card title names it, so no legend box. */
+function barChart(node, rows, key, color, label){
+  var W = node.clientWidth || 640, H = 190,
+      PT = 14, PB = 26, PL = 34, PR = 8,
+      iw = Math.max(10, W-PL-PR), ih = H-PT-PB;
+  var max = Math.max(1, Math.max.apply(null, rows.map(function(r){return +r[key]||0;})));
+  var ticks = niceTicks(max, 3);
+  var top = ticks[ticks.length-1];
+  var band = iw/rows.length;
+  var bw = Math.max(1, Math.min(24, band-2));      // <=24px, >=2px surface gap
+  var R = 4;
+
+  var s = ['<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(label)+'">'];
+  ticks.forEach(function(t){
+    var y = PT+ih-(t/top)*ih;
+    s.push('<line x1="'+PL+'" y1="'+y.toFixed(1)+'" x2="'+(W-PR)+'" y2="'+y.toFixed(1)+
+           '" stroke="'+GRID+'" stroke-width="1"/>');
+    s.push('<text x="'+(PL-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10" '+
+           'fill="'+MUTED+'" font-family="var(--sans)" style="font-variant-numeric:tabular-nums">'+t+'</text>');
+  });
+  rows.forEach(function(r,i){
+    var v = +r[key]||0; if(!v) return;
+    var h = (v/top)*ih, x = PL+i*band+(band-bw)/2, y = PT+ih-h, r2 = Math.min(R,h,bw/2);
+    s.push('<path d="M'+x.toFixed(1)+' '+(PT+ih)+' V'+(y+r2).toFixed(1)+
+           ' a'+r2+' '+r2+' 0 0 1 '+r2+' -'+r2+' h'+(bw-2*r2).toFixed(1)+
+           ' a'+r2+' '+r2+' 0 0 1 '+r2+' '+r2+' V'+(PT+ih)+' Z" fill="'+color+'"/>');
+  });
+  // x labels: first, middle, last only — never one per bar
+  [0, Math.floor(rows.length/2), rows.length-1].filter(function(v,i,a){return a.indexOf(v)===i;})
+    .forEach(function(i){
+      if(!rows[i]) return;
+      var x = PL+i*band+band/2;
+      s.push('<text x="'+x.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="'+MUTED+
+             '" font-family="var(--sans)">'+esc(fmtDay(rows[i].day))+'</text>');
+    });
+  s.push('</svg>');
+  node.innerHTML = s.join('');
+  attachHover(node, rows, band, PL, W, H, function(r){
+    return '<span class="tip__k">'+esc(fmtDay(r.day))+'</span><span class="tip__v">'+
+           (+r[key]||0)+' '+esc(label.toLowerCase())+'</span>';
+  });
+}
+
+/* Line + area wash over time. One series. */
+function lineChart(node, rows, key, color, label){
+  var W = node.clientWidth || 640, H = 190,
+      PT = 14, PB = 26, PL = 34, PR = 10,
+      iw = Math.max(10, W-PL-PR), ih = H-PT-PB;
+  var max = Math.max(1, Math.max.apply(null, rows.map(function(r){return +r[key]||0;})));
+  var ticks = niceTicks(max,3), top = ticks[ticks.length-1];
+  var band = iw/Math.max(1,rows.length);
+  var X = function(i){ return PL + band*i + band/2; };
+  var Y = function(v){ return PT + ih - (v/top)*ih; };
+
+  var s = ['<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(label)+'">'];
+  ticks.forEach(function(t){
+    var y = Y(t);
+    s.push('<line x1="'+PL+'" y1="'+y.toFixed(1)+'" x2="'+(W-PR)+'" y2="'+y.toFixed(1)+
+           '" stroke="'+GRID+'" stroke-width="1"/>');
+    s.push('<text x="'+(PL-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10" fill="'+MUTED+
+           '" font-family="var(--sans)" style="font-variant-numeric:tabular-nums">'+t+'</text>');
+  });
+  var pts = rows.map(function(r,i){ return [X(i), Y(+r[key]||0)]; });
+  if (pts.length){
+    var d = pts.map(function(p,i){ return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); }).join(' ');
+    s.push('<path d="'+d+' L'+pts[pts.length-1][0].toFixed(1)+' '+(PT+ih)+' L'+pts[0][0].toFixed(1)+' '+
+           (PT+ih)+' Z" fill="'+color+'" fill-opacity="0.10"/>');
+    s.push('<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>');
+    var last = pts[pts.length-1];
+    s.push('<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="4.5" fill="'+color+
+           '" stroke="'+SURFACE+'" stroke-width="2"/>');       // >=8px marker + 2px surface ring
+  }
+  [0, Math.floor(rows.length/2), rows.length-1].filter(function(v,i,a){return a.indexOf(v)===i;})
+    .forEach(function(i){
+      if(!rows[i]) return;
+      s.push('<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="'+MUTED+
+             '" font-family="var(--sans)">'+esc(fmtDay(rows[i].day))+'</text>');
+    });
+  s.push('</svg>');
+  node.innerHTML = s.join('');
+  attachHover(node, rows, band, PL, W, H, function(r){
+    return '<span class="tip__k">'+esc(fmtDay(r.day))+'</span><span class="tip__v">'+
+           (+r[key]||0)+' '+esc(label.toLowerCase())+'</span>';
+  }, color);
+}
+
+/* Shared crosshair + tooltip layer. Hit bands are full-height, so targets stay generous. */
+function attachHover(node, rows, band, PL, W, H, fmt, crosshair){
+  if (!rows.length) return;
+  var tip = el('<div class="tip"></div>'); node.appendChild(tip);
+  var svg = node.querySelector('svg');
+  var line = null;
+  if (crosshair){
+    line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('stroke', crosshair); line.setAttribute('stroke-width','1');
+    line.setAttribute('stroke-opacity','0.45'); line.setAttribute('y1','8'); line.setAttribute('y2', H-26);
+    line.style.opacity='0'; svg.appendChild(line);
+  }
+  function pos(e){
+    var box = node.getBoundingClientRect();
+    var scale = W / box.width;
+    var xInSvg = (e.clientX - box.left) * scale;
+    var i = Math.floor((xInSvg - PL) / band);
+    if (i<0) i=0; if (i>rows.length-1) i=rows.length-1;
+    var r = rows[i]; if(!r) return;
+    tip.innerHTML = fmt(r);
+    tip.classList.add('is-on');
+    var tx = (PL + band*i + band/2) / scale;
+    tip.style.left = Math.max(4, Math.min(box.width - tip.offsetWidth - 4, tx - tip.offsetWidth/2)) + 'px';
+    tip.style.top  = '0px';
+    if (line){ var cx = PL + band*i + band/2; line.setAttribute('x1',cx); line.setAttribute('x2',cx); line.style.opacity='1'; }
+  }
+  node.addEventListener('mousemove', pos);
+  node.addEventListener('mouseleave', function(){ tip.classList.remove('is-on'); if(line) line.style.opacity='0'; });
+}
+
+function niceTicks(max, count){
+  var raw = max/count, mag = Math.pow(10, Math.floor(Math.log10(raw)||0));
+  var step = [1,2,2.5,5,10].map(function(m){return m*mag;}).find(function(s){return s>=raw;}) || mag*10;
+  var out=[], v=0;
+  while (v <= max+step*0.001){ out.push(Math.round(v*100)/100); v+=step; }
+  if (out[out.length-1] < max) out.push(Math.round((v)*100)/100);
+  return out;
+}
+
+/* Horizontal bars — one series, every bar direct-labelled. */
+function hbars(rows, keyName, keyVal, color, mapLabel){
+  if (!rows.length) return '<div class="empty">Nothing recorded yet.</div>';
+  var max = Math.max.apply(null, rows.map(function(r){return +r[keyVal]||0;})) || 1;
+  return '<div class="hbars">'+rows.map(function(r){
+    var v = +r[keyVal]||0, w = Math.max(1,(v/max)*100);
+    var name = mapLabel ? mapLabel(r[keyName]) : r[keyName];
+    return '<div class="hbar"><div class="hbar__label" title="'+esc(name)+'">'+esc(name)+'</div>'+
+      '<div class="hbar__track"><div class="hbar__fill" style="width:'+w.toFixed(1)+'%;background:'+color+'"></div></div>'+
+      '<div class="hbar__val">'+v+'</div></div>';
+  }).join('')+'</div>';
+}
+
+function tableOf(headers, rows){
+  return '<div class="tbl-scroll"><table class="tbl"><thead><tr>'+
+    headers.map(function(h){return '<th>'+esc(h)+'</th>';}).join('')+
+    '</tr></thead><tbody>'+rows.map(function(r){
+      return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+/* Every chart has a table-view twin. */
+function card(id, title, note, dotColor, bodyHTML, tableHTML){
+  return '<section class="card" data-card="'+id+'">'+
+    '<div class="card__head"><div>'+
+      '<h3 class="card__title">'+(dotColor?'<span class="dot" style="background:'+dotColor+'"></span>':'')+esc(title)+'</h3>'+
+      (note?'<div class="card__note">'+esc(note)+'</div>':'')+
+    '</div>'+(tableHTML?'<button class="toggle" data-toggle="'+id+'">Table</button>':'')+'</div>'+
+    '<div class="card__body" data-body="'+id+'">'+bodyHTML+'</div>'+
+    (tableHTML?'<div class="card__table" data-table="'+id+'" hidden>'+tableHTML+'</div>':'')+
+  '</section>';
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  var d = state.data, t = d.totals, daily = d.daily || [];
+
+  // fill in missing days so the time axis is continuous
+  var byDay = {}; daily.forEach(function(r){ byDay[r.day]=r; });
+  var series = [], now = new Date();
+  for (var i=state.days-1;i>=0;i--){
+    var dt = new Date(now.getTime()-i*86400000);
+    var key = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(dt);
+    series.push(byDay[key] || {day:key, applyClicks:0, pageViews:0, visitors:0});
+  }
+
+  meta.textContent = 'Since '+fmtDay(d.since)+' · Nashville time' +
+    (d.allTime && d.allTime.firstDay ? ' · tracking since '+fmtDay(d.allTime.firstDay) : '');
+
+  var reportName = function(f){
+    if (state.titles[f]) return state.titles[f];
+    return String(f||'').replace(/\.pdf$/,'').replace(/-/g,' ')
+      .replace(/\b\w/g,function(c){return c.toUpperCase();});
+  };
+  var labelName = function(l){
+    var map = {'hero':'Homepage hero','home-footer-cta':'Homepage bottom','apply-page-hero':'Apply page top',
+      'apply-page-footer':'Apply page bottom','team-cta':'Team page','reports-cta':'Deal reports page'};
+    return map[l] || l;
+  };
+
+  var noData = !t.pageViews && !t.applyClicks;
+
+  content.innerHTML =
+    '<div class="tiles">'+
+      tile('Apply link clicks', compact(t.applyClicks), C.apply,
+           t.applicantSessions+' distinct '+(t.applicantSessions===1?'person':'people')) +
+      tile('Visitors', compact(t.visitors), C.visitors, compact(t.pageViews)+' page views') +
+      tile('Click-through rate', t.visitors ? pct(t.conversionRate) : '—', null,
+           'Visitors who clicked apply') +
+      tile('Report opens', compact(t.reportOpens), C.reports, 'PDF deliverables') +
+    '</div>' +
+
+    (noData ? '<div class="card" style="margin-top:12px"><div class="empty">'+
+        'No traffic recorded in this window yet.<br>Once the site is live and someone visits, numbers appear here within seconds.'+
+        '</div></div>' : '') +
+
+    '<div class="grid">' +
+      card('apply','Apply link clicks per day','Every click on an Apply button, wherever it appears',C.apply,
+           '<div class="plot" id="plotApply"></div>',
+           tableOf(['Day','Apply clicks'], series.map(function(r){return [fmtDay(r.day), r.applyClicks||0];}))) +
+      card('visitors','Visitors per day','Distinct browser sessions',C.visitors,
+           '<div class="plot" id="plotVisitors"></div>',
+           tableOf(['Day','Visitors','Page views'], series.map(function(r){return [fmtDay(r.day), r.visitors||0, r.pageViews||0];}))) +
+    '</div>' +
+
+    '<div class="grid grid--2">' +
+      card('where','Which Apply button they clicked',null,C.apply,
+           hbars(d.byLabel||[], 'label','n', C.apply, labelName),
+           tableOf(['Button','Clicks'], (d.byLabel||[]).map(function(r){return [labelName(r.label), r.n];}))) +
+      card('ref','Where visitors came from','Distinct people, external sources only',C.visitors,
+           hbars(d.byRef||[], 'ref','n', C.visitors),
+           tableOf(['Source','People'], (d.byRef||[]).map(function(r){return [r.ref, r.n];}))) +
+      card('reports','Most-opened deal reports',null,C.reports,
+           hbars(d.byReport||[], 'label','n', C.reports, reportName),
+           tableOf(['Report','Opens'], (d.byReport||[]).map(function(r){return [reportName(r.label), r.n];}))) +
+      card('device','Device',null,C.visitors,
+           hbars(d.byDevice||[], 'device','n', C.visitors, function(x){return x.charAt(0).toUpperCase()+x.slice(1);}),
+           tableOf(['Device','People'], (d.byDevice||[]).map(function(r){return [r.device, r.n];}))) +
+    '</div>';
+
+  drawPlots(series);
+
+  content.querySelectorAll('[data-toggle]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var id=b.getAttribute('data-toggle');
+      var body=content.querySelector('[data-body="'+id+'"]'), tbl=content.querySelector('[data-table="'+id+'"]');
+      var showTable = tbl.hasAttribute('hidden');
+      tbl.toggleAttribute('hidden', !showTable);
+      body.toggleAttribute('hidden', showTable);
+      b.textContent = showTable ? 'Chart' : 'Table';
+      if (!showTable) drawPlots(series);
+    });
+  });
+
+  state.series = series;
+}
+
+function drawPlots(series){
+  var a=document.getElementById('plotApply'), v=document.getElementById('plotVisitors');
+  if (a) barChart(a, series, 'applyClicks', C.apply, 'Apply clicks');
+  if (v) lineChart(v, series, 'visitors', C.visitors, 'Visitors');
+}
+
+function tile(label, value, color, sub){
+  return '<div class="tile"><div class="tile__label">'+
+    (color?'<span class="dot" style="background:'+color+'"></span>':'')+esc(label)+'</div>'+
+    '<div class="tile__value">'+esc(value)+'</div>'+
+    '<div class="tile__sub">'+esc(sub||'')+'</div></div>';
+}
+
+var rt;
+window.addEventListener('resize', function(){
+  clearTimeout(rt);
+  rt = setTimeout(function(){ if (state.series) drawPlots(state.series); }, 150);
+});
+
+})();
+</script>
+<script src="assets/js/admin.js" defer></script>
+</body>
+</html>

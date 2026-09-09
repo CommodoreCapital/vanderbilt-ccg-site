@@ -1,0 +1,10 @@
+# Only needed if you deploy from the command line instead of the Cloudflare website.
+# The web dashboard path in DEPLOY.md does not require this file or Node.js.
+name = "vanderbilt-ccg"
+pages_build_output_dir = "."
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ccg-analytics"
+database_id = "PASTE_YOUR_DATABASE_ID_HERE"

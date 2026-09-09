@@ -1,0 +1,8 @@
+# Keep the old Squarespace URLs working so existing links and Google results don't 404.
+/our-team          /team.html          301
+/ccg-dealreports   /deal-reports.html  301
+/apply-now         /apply.html         301
+/dashboard         /dashboard.html     200
+/team              /team.html          200
+/deal-reports      /deal-reports.html  200
+/apply             /apply.html         200
