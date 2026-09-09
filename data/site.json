@@ -23,13 +23,6 @@
     "closedMessage": "Applications are currently closed. Follow us on Instagram to hear when they reopen."
   },
 
-  "stats": [
-    { "value": "18",   "label": "Firms placed" },
-    { "value": "135+", "label": "Analysts trained" },
-    { "value": "10",   "label": "Deal reports published" },
-    { "value": "2022", "label": "Founded" }
-  ],
-
   "pillars": [
     {
       "name": "Education",
