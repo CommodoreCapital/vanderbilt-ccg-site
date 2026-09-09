@@ -56,14 +56,15 @@
       });
     }
 
-    // mark current page
-    var here = location.pathname.replace(/index\.html$/, '').replace(/\/$/, '') || '/';
+    // Mark the current page. Cloudflare serves these pages without the .html
+    // suffix, while the links in the HTML still carry it, so normalise both.
+    var norm = function (p) {
+      return p.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    };
+    var here = norm(location.pathname);
     $$('.nav__link', nav).forEach(function (a) {
-      var target = a.getAttribute('href').replace(/index\.html$/, '').replace(/\/$/, '') || '/';
-      if (target === here) a.setAttribute('aria-current', 'page');
+      if (norm(a.getAttribute('href')) === here) a.setAttribute('aria-current', 'page');
     });
-  }
-
   /* ---------------- scroll reveal ---------------- */
   function initReveal() {
     var items = $$('.reveal');
