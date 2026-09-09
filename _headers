@@ -4,11 +4,23 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
 
-/assets/*
+# Pictures and PDFs are safe to cache hard: when one is replaced it gets a new
+# name (dashboard uploads become asset:<id>), so the URL changes with it.
+/assets/img/*
   Cache-Control: public, max-age=31536000, immutable
 
 /reports/*
   Cache-Control: public, max-age=86400
+
+# CSS and JS keep the SAME filename forever, so they must never be "immutable".
+# If they are, a browser that once loaded a broken copy will refuse to look for
+# a fixed one for a year. Short cache + revalidation instead: the browser asks
+# "changed?" and normally gets a cheap 304 Not Modified.
+/assets/css/*
+  Cache-Control: public, max-age=300, must-revalidate
+
+/assets/js/*
+  Cache-Control: public, max-age=300, must-revalidate
 
 /data/site.json
   Cache-Control: public, max-age=60
