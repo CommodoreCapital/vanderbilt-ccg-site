@@ -134,6 +134,22 @@ table{border-collapse:collapse;width:100%}
 .klass__n{font-size:.74rem;color:var(--text-muted);white-space:nowrap}
 .klass__names{font-size:.84rem;line-height:1.6}
 
+/* deal reports */
+.reps{display:flex;flex-direction:column;gap:12px}
+.rep{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;
+  padding:14px;background:var(--surface-0);border:1px solid var(--line);border-radius:var(--radius)}
+.rep__fields{display:flex;flex-direction:column;gap:8px;min-width:0}
+.rep__row{display:grid;grid-template-columns:1fr 140px;gap:8px}
+.rep__file{font-size:.76rem;color:var(--brand);text-decoration:none;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.rep__file:hover{text-decoration:underline}
+.rep__ops{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+@media(max-width:700px){
+  .rep{grid-template-columns:1fr}
+  .rep__row{grid-template-columns:1fr}
+  .rep__ops{flex-direction:row;align-items:center}
+}
+
 /* logo slider */
 .logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
 .logo{padding:12px;background:var(--surface-0);border:1px solid var(--line);border-radius:var(--radius)}
@@ -695,6 +711,6 @@ window.addEventListener('resize', function(){
 
 })();
 </script>
-<script src="assets/js/admin.js?v=202609091458" defer></script>
+<script src="assets/js/admin.js?v=202609091813" defer></script>
 </body>
 </html>
