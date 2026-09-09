@@ -1,8 +1,9 @@
-# Keep the old Squarespace URLs working so existing links and Google results don't 404.
-/our-team          /team.html          301
-/ccg-dealreports   /deal-reports.html  301
-/apply-now         /apply.html         301
-/dashboard         /dashboard.html     200
-/team              /team.html          200
-/deal-reports      /deal-reports.html  200
-/apply             /apply.html         200
+# Old Squarespace URLs -> new pages, so existing links and Google results keep working.
+#
+# NOTE: Cloudflare Pages already serves "/team" for "team.html" by itself, and
+# redirects "/team.html" -> "/team". Do NOT add rules like "/team /team.html 200"
+# here: they fight that behaviour and create an infinite redirect loop that takes
+# down every page on the site. Point these at the extensionless paths.
+/our-team          /team           301
+/ccg-dealreports   /deal-reports   301
+/apply-now         /apply          301
