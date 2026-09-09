@@ -124,13 +124,6 @@
   /* ---------------- renderers ---------------- */
   var R = {};
 
-  R.stats = function (el, d) {
-    el.innerHTML = d.stats.map(function (s) {
-      return '<div class="stat"><div class="stat__value">' + esc(s.value) + '</div>' +
-             '<div class="stat__label">' + esc(s.label) + '</div></div>';
-    }).join('');
-  };
-
   R.pillars = function (el, d) {
     el.innerHTML = d.pillars.map(function (p, i) {
       return '<article class="pillar reveal" data-delay="' + (i * 90) + '">' +
@@ -184,12 +177,26 @@
     }).join('');
   };
 
+  // Surname for sorting: drop a trailing generational suffix (Jr, III, V...)
+  // then take the last word. Handles "Philip Dee Block V" -> Block and
+  // "Renato Zamboni de Albuquerque" -> Albuquerque.
+  function surname(name) {
+    var parts = String(name).replace(/\(.*?\)/g, ' ').trim().split(/\s+/);
+    var suffix = /^(jr|sr|ii|iii|iv|v|vi)\.?$/i;
+    while (parts.length > 1 && suffix.test(parts[parts.length - 1])) parts.pop();
+    return (parts[parts.length - 1] || '').toLowerCase();
+  }
+
   R.classes = function (el, d) {
     el.innerHTML = d.analystClasses.map(function (c) {
+      var sorted = c.members.slice().sort(function (a, b) {
+        var s = surname(a).localeCompare(surname(b));
+        return s !== 0 ? s : String(a).localeCompare(String(b));
+      });
       return '<div class="class reveal"><div class="class__grid">' +
         '<div><div class="class__term">' + esc(c.term) + '</div>' +
-        '<span class="class__count">' + c.members.length + ' analysts</span></div>' +
-        '<ul class="class__names">' + c.members.map(function (n) {
+        '<span class="class__count">' + sorted.length + ' analysts</span></div>' +
+        '<ul class="class__names">' + sorted.map(function (n) {
           return '<li>' + esc(n) + '</li>';
         }).join('') + '</ul></div></div>';
     }).join('');
@@ -251,7 +258,7 @@
       return;
     }
     el.innerHTML =
-      '<a class="btn btn--gold" href="' + esc(a.url) + '" target="_blank" rel="noopener"' +
+      '<a class="btn btn--accent" href="' + esc(a.url) + '" target="_blank" rel="noopener"' +
       ' data-track="apply" data-track-label="' + esc(where) + '">' + esc(a.buttonLabel) +
       '<span class="btn__arrow" aria-hidden="true">&rarr;</span></a>';
   };
