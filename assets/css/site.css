@@ -12,11 +12,12 @@
      --accent    sits on the dark sections   (8.9:1 on --ink)
      --accent-ink sits on the light sections (6.1:1 on --paper)
      Never use --accent for text on a light background. */
-  --accent:         #7FB2F0;
-  --accent-bright:  #A9CBF7;
-  --accent-dim:     rgba(127,178,240,.14);
-  --accent-ink:     #1D5FA8;
-  --accent-ink-dark:#17559C;   /* hover for solid blue buttons */
+  --accent:         #91B6DB;   /* steel blue, hue 210 — sampled from the hero
+                                  photograph carried over from the old site */
+  --accent-bright:  #B3CFE9;
+  --accent-dim:     rgba(145,182,219,.14);
+  --accent-ink:     #325B85;
+  --accent-ink-dark:#2A527A;   /* hover for solid blue buttons */
   --paper:          #FAF9F7;   /* light background */
   --paper-2:        #F1EFEA;
   --line:           #E2DED6;   /* hairline on light */
@@ -195,7 +196,7 @@ ul{margin:0; padding:0; list-style:none}
   content:""; position:absolute; inset:0;
   background:
     linear-gradient(180deg, rgba(11,11,12,.72) 0%, rgba(11,11,12,.35) 38%, rgba(11,11,12,.94) 100%),
-    radial-gradient(120% 80% at 20% 100%, rgba(127,178,240,.13), transparent 60%);
+    radial-gradient(120% 80% at 20% 100%, rgba(145,182,219,.14), transparent 60%);
 }
 .hero__inner{ position:relative; z-index:1; width:100%; }
 .hero__title{ color:var(--text-on-dark); max-width:16ch }
@@ -409,7 +410,7 @@ ul{margin:0; padding:0; list-style:none}
 .cta{ background:var(--ink); position:relative; overflow:hidden; text-align:center }
 .cta::before{
   content:""; position:absolute; inset:0;
-  background:radial-gradient(70% 120% at 50% 0%, rgba(127,178,240,.15), transparent 62%);
+  background:radial-gradient(70% 120% at 50% 0%, rgba(145,182,219,.16), transparent 62%);
 }
 .cta .wrap{ position:relative; z-index:1 }
 .cta h2{ color:var(--text-on-dark); margin-inline:auto; max-width:18ch }
