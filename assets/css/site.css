@@ -121,7 +121,17 @@ ul{margin:0; padding:0; list-style:none}
 .nav__inner{
   display:flex; align-items:center; justify-content:space-between; gap:1.5rem;
   height:var(--nav-h);
+  position:relative; z-index:1;
 }
+/* Before the solid bar kicks in, the nav floats over a photograph. Since the
+   pagehead images were brightened, the logo needs its own scrim or it sits on
+   a busy background. Fades out once .is-solid takes over. */
+.nav::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, rgba(11,11,12,.78) 0%, rgba(11,11,12,.45) 55%, rgba(11,11,12,0) 100%);
+  transition:opacity .35s var(--ease);
+}
+.nav.is-solid::before{ opacity:0 }
 .nav__logo img{ height:var(--logo-h); width:auto; transition:opacity .3s, height .3s }
 .nav__logo .logo-dark{ display:none }
 .nav__links{ display:flex; align-items:center; gap:2.25rem }
@@ -149,12 +159,13 @@ ul{margin:0; padding:0; list-style:none}
 /* mobile */
 .nav__toggle{ display:none; width:44px; height:44px; margin-right:-10px; position:relative; z-index:2 }
 .nav__toggle span{
-  display:block; height:1.5px; width:22px; background:var(--text-on-dark); margin:5px auto;
+  display:block; height:2px; width:26px; background:var(--text-on-dark); margin:6px auto;
+  border-radius:2px;
   transition:transform .3s var(--ease), opacity .2s;
 }
-.nav.is-open .nav__toggle span:nth-child(1){ transform:translateY(6.5px) rotate(45deg) }
+.nav.is-open .nav__toggle span:nth-child(1){ transform:translateY(8px) rotate(45deg) }
 .nav.is-open .nav__toggle span:nth-child(2){ opacity:0 }
-.nav.is-open .nav__toggle span:nth-child(3){ transform:translateY(-6.5px) rotate(-45deg) }
+.nav.is-open .nav__toggle span:nth-child(3){ transform:translateY(-8px) rotate(-45deg) }
 
 @media (max-width:860px){
   /* Scale the header down on phones — the desktop size would take a third
