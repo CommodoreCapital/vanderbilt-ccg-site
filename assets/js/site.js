@@ -96,22 +96,30 @@
   }
 
   /* ---------------- accordions ---------------- */
+  // initAccordions runs twice: once when the FAQ list is rendered, and again
+  // from boot() for anything already in the page. Without the guard below each
+  // question got two click listeners, so a click opened AND closed it and the
+  // FAQ looked completely dead.
   function initAccordions(root) {
     $$('.faq', root || document).forEach(function (faq) {
+      if (faq.getAttribute('data-wired')) return;
       var q = $('.faq__q', faq), a = $('.faq__a', faq);
       if (!q || !a) return;
+      faq.setAttribute('data-wired', '1');
       q.addEventListener('click', function () {
         var open = faq.classList.toggle('is-open');
         q.setAttribute('aria-expanded', open ? 'true' : 'false');
         a.style.height = open ? a.scrollHeight + 'px' : '0px';
       });
     });
-    window.addEventListener('resize', function () {
-      $$('.faq.is-open .faq__a', root || document).forEach(function (a) {
-        a.style.height = a.scrollHeight + 'px';
-      });
-    });
   }
+
+  // One resize listener for the whole page, not one per initAccordions call.
+  window.addEventListener('resize', function () {
+    $$('.faq.is-open .faq__a').forEach(function (a) {
+      a.style.height = a.scrollHeight + 'px';
+    });
+  });
 
   /* ---------------- renderers ---------------- */
   var R = {};
