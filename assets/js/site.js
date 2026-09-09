@@ -65,6 +65,8 @@
     $$('.nav__link', nav).forEach(function (a) {
       if (norm(a.getAttribute('href')) === here) a.setAttribute('aria-current', 'page');
     });
+  }
+
   /* ---------------- scroll reveal ---------------- */
   function initReveal() {
     var items = $$('.reveal');
