@@ -14,6 +14,14 @@ var esc = function (s) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
   });
 };
+// Build a detached element from an HTML string. admin.js runs in its own
+// scope, so it cannot borrow the dashboard's copy of this helper.
+var el = function (html) {
+  var t = document.createElement('template');
+  t.innerHTML = String(html).trim();
+  return t.content.firstElementChild;
+};
+
 var $  = function (s, c) { return (c || mount).querySelector(s); };
 var $$ = function (s, c) { return Array.prototype.slice.call((c || mount).querySelectorAll(s)); };
 
@@ -331,6 +339,170 @@ function secClasses(b) {
   });
 }
 
+/* ---- Image cropper ----------------------------------------------------
+   Logos arrive with wildly different amounts of surrounding whitespace, which
+   is why the slider looks uneven. "Trim edges" finds the real bounding box of
+   the artwork and cuts to it; dragging on the image crops by hand.
+   Everything happens in a canvas, then uploads the result as a new PNG. */
+function openCropper(src, onDone) {
+  var W = 560, H = 320;                       // working canvas size on screen
+  var ov = el('<div class="crop">' +
+      '<div class="crop__box">' +
+        '<div class="crop__head"><strong>Crop logo</strong>' +
+          '<span class="crop__hint">Drag on the image to select an area</span></div>' +
+        '<div class="crop__stage"><canvas class="crop__canvas"></canvas>' +
+          '<div class="crop__sel" hidden></div></div>' +
+        '<div class="crop__preview"><span>Preview on the site</span><div class="crop__strip"></div></div>' +
+        '<div class="crop__ops">' +
+          '<button class="toggle" data-a="trim">Trim edges</button>' +
+          '<button class="toggle" data-a="reset">Reset</button>' +
+          '<span style="flex:1"></span>' +
+          '<button class="toggle" data-a="cancel">Cancel</button>' +
+          '<button class="btn" data-a="apply">Apply crop</button>' +
+        '</div>' +
+      '</div></div>');
+  document.body.appendChild(ov);
+
+  var canvas = ov.querySelector('.crop__canvas');
+  var selBox = ov.querySelector('.crop__sel');
+  var strip  = ov.querySelector('.crop__strip');
+  var ctx    = canvas.getContext('2d', { willReadFrequently: true });
+  var img    = new Image();
+  var sel    = null;                          // {x,y,w,h} in natural pixels
+  var scale  = 1, offX = 0, offY = 0;
+
+  img.crossOrigin = 'anonymous';
+  img.onerror = function () { alert('Could not load that image for cropping.'); ov.remove(); };
+  img.onload = function () {
+    scale = Math.min(W / img.naturalWidth, H / img.naturalHeight, 1);
+    canvas.width  = Math.round(img.naturalWidth  * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    draw(); preview();
+  };
+  img.src = src;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    if (!sel) { selBox.hidden = true; return; }
+    selBox.hidden = false;
+    selBox.style.left   = (sel.x * scale) + 'px';
+    selBox.style.top    = (sel.y * scale) + 'px';
+    selBox.style.width  = (sel.w * scale) + 'px';
+    selBox.style.height = (sel.h * scale) + 'px';
+  }
+
+  /* the cropped result, as a canvas */
+  function output() {
+    var r = sel || { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+    var out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(r.w));
+    out.height = Math.max(1, Math.round(r.h));
+    out.getContext('2d').drawImage(img, r.x, r.y, r.w, r.h, 0, 0, out.width, out.height);
+    return out;
+  }
+
+  /* show it the way the homepage does: white, on the dark band */
+  function preview() {
+    strip.innerHTML = '';
+    var im = document.createElement('img');
+    im.src = output().toDataURL('image/png');
+    strip.appendChild(im);
+  }
+
+  /* Find the artwork's real bounding box. The background is read from the
+     four corners, so this copes with transparent, white, off-white and solid
+     colour backgrounds alike — not just near-white. */
+  function trim() {
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    var cx = c.getContext('2d', { willReadFrequently: true });
+    cx.drawImage(img, 0, 0);
+    var d;
+    try { d = cx.getImageData(0, 0, c.width, c.height).data; }
+    catch (e) { alert('This image cannot be trimmed automatically.'); return; }
+
+    var at = function (x, y) { var i = (y * c.width + x) * 4; return [d[i], d[i+1], d[i+2], d[i+3]]; };
+    var corners = [at(0,0), at(c.width-1,0), at(0,c.height-1), at(c.width-1,c.height-1)];
+    var opaque = corners.filter(function (p) { return p[3] >= 12; });
+    var bg = opaque.length
+      ? [0,1,2].map(function (k) {
+          return Math.round(opaque.reduce(function (t, p) { return t + p[k]; }, 0) / opaque.length);
+        })
+      : null;
+    var TOL = 30;
+    var isBg = function (r, g, b, a) {
+      if (a < 12) return true;
+      if (!bg) return false;
+      return Math.sqrt((r-bg[0])*(r-bg[0]) + (g-bg[1])*(g-bg[1]) + (b-bg[2])*(b-bg[2])) < TOL;
+    };
+
+    var minX = c.width, minY = c.height, maxX = -1, maxY = -1;
+    for (var y = 0; y < c.height; y++) {
+      for (var x = 0; x < c.width; x++) {
+        var i = (y * c.width + x) * 4;
+        if (isBg(d[i], d[i+1], d[i+2], d[i+3])) continue;
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+    }
+    if (maxX < 0) { alert('Nothing to trim — the image looks empty.'); return; }
+
+    var w = maxX - minX + 1, h = maxY - minY + 1;
+    if (w >= c.width - 2 && h >= c.height - 2) {
+      alert('This logo is already cropped tight — there is no padding to remove.');
+      return;
+    }
+    var pad = 2;
+    sel = { x: Math.max(0, minX - pad), y: Math.max(0, minY - pad),
+            w: Math.min(c.width,  maxX + 1 + pad) - Math.max(0, minX - pad),
+            h: Math.min(c.height, maxY + 1 + pad) - Math.max(0, minY - pad) };
+    draw(); preview();
+  }
+
+  /* drag to select */
+  var dragging = false, sx = 0, sy = 0;
+  var stage = ov.querySelector('.crop__stage');
+  function pt(e) {
+    var b = canvas.getBoundingClientRect();
+    return { x: (e.clientX - b.left) / scale, y: (e.clientY - b.top) / scale };
+  }
+  canvas.addEventListener('mousedown', function (e) {
+    dragging = true; var p = pt(e); sx = p.x; sy = p.y; sel = null; draw();
+  });
+  stage.addEventListener('mousemove', function (e) {
+    if (!dragging) return;
+    var p = pt(e);
+    sel = { x: Math.max(0, Math.min(sx, p.x)), y: Math.max(0, Math.min(sy, p.y)),
+            w: Math.min(img.naturalWidth,  Math.abs(p.x - sx)),
+            h: Math.min(img.naturalHeight, Math.abs(p.y - sy)) };
+    draw();
+  });
+  window.addEventListener('mouseup', function up() {
+    if (!dragging) return;
+    dragging = false;
+    if (sel && (sel.w < 4 || sel.h < 4)) sel = null;
+    draw(); preview();
+  });
+
+  ov.addEventListener('click', function (e) {
+    var a = e.target.getAttribute && e.target.getAttribute('data-a');
+    if (!a) { if (e.target === ov) ov.remove(); return; }
+    if (a === 'cancel') return ov.remove();
+    if (a === 'trim')   return trim();
+    if (a === 'reset')  { sel = null; draw(); preview(); return; }
+    if (a === 'apply') {
+      var btn = e.target; btn.disabled = true; btn.textContent = 'Uploading…';
+      output().toBlob(function (blob) {
+        if (!blob) { alert('Could not produce the cropped image.'); ov.remove(); return; }
+        var file = new File([blob], 'logo-cropped.png', { type: 'image/png' });
+        upload(file, function (ref) { ov.remove(); onDone(ref); },
+                     function (m) { alert(m); btn.disabled = false; btn.textContent = 'Apply crop'; });
+      }, 'image/png');
+    }
+  });
+}
+
 /* ---- Deal reports ---- */
 function reportHref(file) {
   file = String(file || '');
@@ -428,6 +600,7 @@ function secSlider(b) {
           '</div>' +
           '<input class="fld__i" data-k="name" value="' + esc(p.name) + '" placeholder="Firm name">' +
           '<div class="logo__ops">' +
+            '<button class="toggle" data-crop="1">Crop</button>' +
             '<button class="toggle" data-pick="1">Change image</button>' +
             '<button class="iconbtn" data-mv="-1" ' + (i === 0 ? 'disabled' : '') + '>↑</button>' +
             '<button class="iconbtn" data-mv="1" ' + (i === data.placements.length - 1 ? 'disabled' : '') + '>↓</button>' +
@@ -452,6 +625,13 @@ function secSlider(b) {
     var i = +row.getAttribute('data-i');
     row.querySelector('[data-k="name"]').addEventListener('input', function () {
       data.placements[i].name = this.value; markDirty();
+    });
+    row.querySelector('[data-crop]').addEventListener('click', function () {
+      var current = imgSrc('assets/img/placements/', data.placements[i].logo);
+      if (!current) { alert('Add an image first, then crop it.'); return; }
+      openCropper(current, function (ref) {
+        data.placements[i].logo = ref; markDirty(); secSlider($('#edBody'));
+      });
     });
     row.querySelector('[data-pick]').addEventListener('click', function () {
       var btn = this, old = btn.textContent;
