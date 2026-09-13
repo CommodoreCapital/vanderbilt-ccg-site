@@ -19,8 +19,21 @@ The single most important one. Change the Google Form URL here when you make a
 new form — **every Apply button on the site updates at once**, and click
 tracking keeps working with no extra steps.
 
-You can also flip applications **Open / Closed**. When closed, every Apply
-button is replaced by your "closed" message automatically.
+You can also flip applications **Open / Closed**. Closed does two things:
+
+* On the **Apply page**, the normal hero and "Ready when you are" block are
+  replaced by a dedicated **closed screen** — a badge reading *Applications
+  closed*, your heading, a paragraph, an optional line about when you reopen,
+  and a button (Instagram by default).
+* **Everywhere else** — home, Our Team, Deal Reports — each Apply button turns
+  into your short closed message plus a link through to that screen.
+
+The whole closed screen is edited in the same tab, in **The closed screen**
+card underneath. You can write it while applications are still open: it just
+sits there unused until you flip the switch, so you are not drafting copy in a
+hurry on the day you close. The checkbox at the bottom decides whether the FAQs
+stay on the page while you are closed — leave it on unless the answers have
+gone stale.
 
 ### Exec team
 Edit names, roles, emails, LinkedIn URLs and bios for the executive board and

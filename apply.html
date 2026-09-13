@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/site.css?v=202609101524">
+  <link rel="stylesheet" href="assets/css/site.css?v=202609131604">
   <meta property="og:title" content="Apply | Commodore Capital Group">
   <meta property="og:description" content="Applications for the next CCG analyst class.">
   <link rel="canonical" href="https://vanderbiltccg.com/apply.html">
@@ -34,7 +34,20 @@
 </header>
 
 <main id="main">
-  <section class="pagehead">
+  <!-- ======================================================================
+       THE CLOSED SCREEN.
+       Shown instead of the normal Apply page whenever "Are applications open?"
+       is set to Closed in the dashboard. Everything inside is filled in from
+       the dashboard — do not hard-code text here.
+       ====================================================================== -->
+  <section class="pagehead pagehead--closed" data-when="closed" hidden>
+    <div class="pagehead__media"><img src="assets/img/photos/hero.jpg" alt=""></div>
+    <div class="wrap">
+      <div class="closed" data-render="applyClosed"></div>
+    </div>
+  </section>
+
+  <section class="pagehead" data-when="open">
     <div class="pagehead__media"><img src="assets/img/photos/hero.jpg" alt=""></div>
     <div class="wrap">
       <p class="eyebrow">Recruitment</p>
@@ -44,7 +57,7 @@
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" data-when="faqs">
     <div class="wrap">
       <div class="sechead reveal">
         <p class="eyebrow">Before you apply</p>
@@ -54,7 +67,7 @@
     </div>
   </section>
 
-  <section class="section cta">
+  <section class="section cta" data-when="open">
     <div class="wrap">
       <h2 class="display d2">Ready when you are</h2>
       <p class="lead">Applications are reviewed anonymously. Remove identifying details from your resume before submitting.</p>
@@ -96,7 +109,7 @@
     </div>
   </div>
 </footer>
-<script src="assets/js/site.js?v=202609101524" defer></script>
-<script src="assets/js/track.js?v=202609101524" defer></script>
+<script src="assets/js/site.js?v=202609131604" defer></script>
+<script src="assets/js/track.js?v=202609131604" defer></script>
 </body>
 </html>
