@@ -160,45 +160,116 @@ function section(name) {
   if (name === 'slider')  return secSlider(b);
 }
 
-function field(label, value, hint) {
+function field(label, value, hint, key, type) {
   return '<label class="fld"><span class="fld__l">' + esc(label) + '</span>' +
-    '<input class="fld__i" type="text" value="' + esc(value || '') + '">' +
+    '<input class="fld__i" type="' + (type || 'text') + '"' +
+    (key ? ' data-k="' + esc(key) + '"' : '') +
+    ' value="' + esc(value || '') + '">' +
     (hint ? '<span class="fld__h">' + esc(hint) + '</span>' : '') + '</label>';
+}
+
+function area(label, value, hint, key, rows) {
+  return '<label class="fld"><span class="fld__l">' + esc(label) + '</span>' +
+    '<textarea class="fld__i fld__t" rows="' + (rows || 3) + '" data-k="' + esc(key) + '">' +
+    esc(value || '') + '</textarea>' +
+    (hint ? '<span class="fld__h">' + esc(hint) + '</span>' : '') + '</label>';
+}
+
+/* Read/write data by a dotted path, so a field can bind itself: "closed.body"
+   means data.apply.closed.body. */
+function setPath(obj, path, value) {
+  var parts = path.split('.'), o = obj;
+  for (var i = 0; i < parts.length - 1; i++) {
+    if (typeof o[parts[i]] !== 'object' || o[parts[i]] === null) o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  o[parts[parts.length - 1]] = value;
+}
+
+/* Content saved before the closed screen existed has no "closed" block. */
+function closedDefaults(a) {
+  if (!a.closed || typeof a.closed !== 'object') a.closed = {};
+  var c = a.closed;
+  if (c.headline == null) c.headline = "We're between application cycles";
+  if (c.body     == null) c.body     = a.closedMessage || '';
+  if (c.reopens  == null) c.reopens  = '';
+  if (c.ctaLabel == null) c.ctaLabel = 'Follow us on Instagram';
+  if (c.ctaUrl   == null) c.ctaUrl   = '';
+  if (c.showFaqs == null) c.showFaqs = true;
+  return c;
 }
 
 /* ---- Apply link ---- */
 function secApply(b) {
   var a = data.apply;
+  var c = closedDefaults(a);
+
   b.innerHTML =
     '<div class="card">' +
       '<h3 class="card__title">The Apply button</h3>' +
       '<p class="card__note" style="margin-bottom:18px">This one link is used by every Apply button on the site. ' +
         'Change it here when you make a new Google Form — click tracking keeps working automatically.</p>' +
       '<label class="fld"><span class="fld__l">Application form link</span>' +
-        '<input class="fld__i" id="aUrl" type="url" value="' + esc(a.url) + '" placeholder="https://forms.gle/…"></label>' +
+        '<input class="fld__i" data-k="url" type="url" value="' + esc(a.url) + '" placeholder="https://forms.gle/…"></label>' +
       '<div class="fld"><span class="fld__l">Are applications open?</span>' +
         '<div class="seg"><button class="seg__b' + (a.isOpen ? ' is-on' : '') + '" data-open="1">Open</button>' +
         '<button class="seg__b' + (!a.isOpen ? ' is-on' : '') + '" data-open="0">Closed</button></div>' +
-        '<span class="fld__h">When closed, every Apply button is replaced by the message below.</span></div>' +
-      field('Headline', a.headline, 'Shown on the Apply page and in the banner, e.g. "Fall 2027 Applications Open Now"') +
-      field('Sub-heading', a.subhead) +
-      field('Button text', a.buttonLabel) +
-      field('Message when closed', a.closedMessage) +
+        '<span class="fld__h">Closed swaps the Apply page for the closed screen below, and replaces every ' +
+          'Apply button elsewhere on the site with your short message.</span></div>' +
+      field('Headline', a.headline, 'Shown on the Apply page and in the banner, e.g. "Fall 2027 Applications Open Now"', 'headline') +
+      field('Sub-heading', a.subhead, '', 'subhead') +
+      field('Button text', a.buttonLabel, '', 'buttonLabel') +
+    '</div>' +
+
+    '<div class="card" id="closedCard">' +
+      '<div class="card__head"><div>' +
+        '<h3 class="card__title">The closed screen</h3>' +
+        '<div class="card__note" id="closedState"></div>' +
+      '</div>' +
+      '<a class="toggle" href="/apply" target="_blank" rel="noopener">Preview the Apply page ↗</a></div>' +
+
+      field('Heading', c.headline, 'The badge above it always reads "Applications closed".', 'closed.headline') +
+      area('Main paragraph', c.body, 'The first thing a visitor reads. Say what happened and what comes next.', 'closed.body', 3) +
+      area('When we reopen', c.reopens, 'Optional. Leave blank to hide this line.', 'closed.reopens', 2) +
+      field('Button text', c.ctaLabel, 'Optional. Leave the text or the link blank to hide the button.', 'closed.ctaLabel') +
+      field('Button link', c.ctaUrl, 'Leave blank to use your Instagram page.', 'closed.ctaUrl', 'url') +
+      '<label class="fld" style="display:flex;align-items:center;gap:9px">' +
+        '<input type="checkbox" id="closedFaqs"' + (c.showFaqs ? ' checked' : '') + '>' +
+        '<span class="fld__l" style="margin:0">Keep the FAQs on the page while closed</span></label>' +
+      '<hr style="border:0;border-top:1px solid var(--line);margin:20px 0">' +
+      area('Short message for the other pages', a.closedMessage,
+        'Replaces the Apply button on the home, team and deal report pages. One or two sentences.',
+        'closedMessage', 2) +
     '</div>';
 
-  var inputs = $$('.fld__i', b);
-  $('#aUrl').addEventListener('input', function () { data.apply.url = this.value.trim(); markDirty(); });
-  var keys = ['headline', 'subhead', 'buttonLabel', 'closedMessage'];
-  inputs.forEach(function (inp) {
-    if (inp.id === 'aUrl') return;
-    var k = keys.shift();
-    inp.addEventListener('input', function () { data.apply[k] = this.value; markDirty(); });
+  function paintState() {
+    var n = $('#closedState');
+    if (!n) return;
+    n.textContent = data.apply.isOpen
+      ? 'Not showing right now — applications are open. You can still write it here, ready for when they close.'
+      : 'Live now. This is what visitors see on the Apply page.';
+  }
+  paintState();
+
+  $$('[data-k]', b).forEach(function (inp) {
+    var k = inp.getAttribute('data-k');
+    inp.addEventListener('input', function () {
+      setPath(data.apply, k, inp.type === 'url' ? this.value.trim() : this.value);
+      markDirty();
+    });
   });
+
+  $('#closedFaqs').addEventListener('change', function () {
+    data.apply.closed.showFaqs = this.checked;
+    markDirty();
+  });
+
   $$('.seg__b', b).forEach(function (btn) {
     btn.addEventListener('click', function () {
       $$('.seg__b', b).forEach(function (x) { x.classList.remove('is-on'); });
       btn.classList.add('is-on');
       data.apply.isOpen = btn.getAttribute('data-open') === '1';
+      paintState();
       markDirty();
     });
   });

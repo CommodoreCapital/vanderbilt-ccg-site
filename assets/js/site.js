@@ -249,12 +249,49 @@
     initAccordions(el);
   };
 
+  /* The closed-applications settings, with sensible fallbacks. Content saved
+     from the dashboard before this screen existed has no "closed" block. */
+  function closedInfo(d) {
+    var c = (d.apply && d.apply.closed) || {};
+    return {
+      headline: c.headline || "We're between application cycles",
+      body:     c.body     || d.apply.closedMessage || '',
+      reopens:  c.reopens  || '',
+      ctaLabel: c.ctaLabel || '',
+      ctaUrl:   c.ctaUrl   || d.org.instagram || '',
+      showFaqs: c.showFaqs !== false
+    };
+  }
+
+  /* The dedicated screen shown on the Apply page while applications are shut.
+     It replaces the normal hero and call-to-action: see [data-when] below. */
+  R.applyClosed = function (el, d) {
+    var c = closedInfo(d);
+    el.innerHTML =
+      '<span class="cta__status">Applications closed</span>' +
+      '<h1 class="display d1">' + esc(c.headline) + '</h1>' +
+      (c.body ? '<p class="lead">' + esc(c.body) + '</p>' : '') +
+      (c.reopens ? '<p class="closed__reopens">' + esc(c.reopens) + '</p>' : '') +
+      '<div class="closed__actions">' +
+        (c.ctaLabel && c.ctaUrl
+          ? '<a class="btn btn--accent" href="' + esc(c.ctaUrl) + '" target="_blank" rel="noopener">' +
+            esc(c.ctaLabel) + '<span class="btn__arrow" aria-hidden="true">&rarr;</span></a>'
+          : '') +
+        '<a class="btn btn--ghost" href="deal-reports.html">Read our deal reports</a>' +
+      '</div>';
+  };
+
   /* Apply call-to-action blocks. Renders open/closed state from site.json. */
   R.applyCta = function (el, d) {
     var a = d.apply;
     var where = el.getAttribute('data-track-label') || 'cta';
     if (!a.isOpen) {
-      el.innerHTML = '<p class="lead" style="margin-top:1.4rem">' + esc(a.closedMessage) + '</p>';
+      // data-compact marks a slot that sits in a row of buttons (the home hero),
+      // where a paragraph would break the layout.
+      var link = '<a class="btn btn--ghost" href="apply.html">See when we reopen' +
+        '<span class="btn__arrow" aria-hidden="true">&rarr;</span></a>';
+      el.innerHTML = el.hasAttribute('data-compact') ? link
+        : '<p class="apply-closed">' + esc(a.closedMessage) + '</p>' + link;
       return;
     }
     el.innerHTML =
@@ -277,8 +314,27 @@
   R.linkedin       = function (el, d) { el.setAttribute('href', d.org.linkedin); };
   R.instagram      = function (el, d) { el.setAttribute('href', d.org.instagram); };
 
+  /* Show or hide whole blocks depending on whether applications are open.
+     <section data-when="closed"> appears only while they are closed, and
+     <... data-when="open"> only while they are open. Runs before rendering so
+     nothing hidden is ever measured by the reveal observer. */
+  function gateByApplyState(d) {
+    var open = !!(d.apply && d.apply.isOpen);
+    var showFaqs = open || closedInfo(d).showFaqs;
+    document.documentElement.setAttribute('data-apply', open ? 'open' : 'closed');
+    $$('[data-when]').forEach(function (el) {
+      var want = el.getAttribute('data-when');
+      var show = want === 'closed' ? !open
+               : want === 'open'   ? open
+               : want === 'faqs'   ? (open || showFaqs)
+               : true;
+      el.hidden = !show;
+    });
+  }
+
   /* ---------------- boot ---------------- */
   function boot(data) {
+    gateByApplyState(data);
     $$('[data-render]').forEach(function (el) {
       var key = el.getAttribute('data-render');
       var fn = R[key];
