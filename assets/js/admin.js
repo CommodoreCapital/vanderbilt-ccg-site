@@ -231,7 +231,7 @@ function secApply(b) {
       field('Heading', c.headline, 'The badge above it always reads "Applications closed".', 'closed.headline') +
       area('Main paragraph', c.body, 'The first thing a visitor reads. Say what happened and what comes next.', 'closed.body', 3) +
       area('When we reopen', c.reopens, 'Optional. Leave blank to hide this line.', 'closed.reopens', 2) +
-      field('Button text', c.ctaLabel, 'Optional. Leave the text or the link blank to hide the button.', 'closed.ctaLabel') +
+      field('Button text', c.ctaLabel, 'Leave this blank to hide the button altogether.', 'closed.ctaLabel') +
       field('Button link', c.ctaUrl, 'Leave blank to use your Instagram page.', 'closed.ctaUrl', 'url') +
       '<label class="fld" style="display:flex;align-items:center;gap:9px">' +
         '<input type="checkbox" id="closedFaqs"' + (c.showFaqs ? ' checked' : '') + '>' +

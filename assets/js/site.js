@@ -252,12 +252,17 @@
   /* The closed-applications settings, with sensible fallbacks. Content saved
      from the dashboard before this screen existed has no "closed" block. */
   function closedInfo(d) {
-    var c = (d.apply && d.apply.closed) || {};
+    var saved = d.apply && d.apply.closed;      // absent on older saved content
+    var c = saved || {};
     return {
       headline: c.headline || "We're between application cycles",
       body:     c.body     || d.apply.closedMessage || '',
       reopens:  c.reopens  || '',
-      ctaLabel: c.ctaLabel || '',
+      // An empty label hides the button — that is a deliberate choice in the
+      // dashboard. But content saved before this screen existed has no label
+      // at all, and a screen with no way forward is worse than a guess, so
+      // fall back to Instagram only in that case.
+      ctaLabel: c.ctaLabel != null ? c.ctaLabel : (saved ? '' : 'Follow us on Instagram'),
       ctaUrl:   c.ctaUrl   || d.org.instagram || '',
       showFaqs: c.showFaqs !== false
     };
